@@ -1,14 +1,10 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
-from streamlit_autorefresh import st_autorefresh
 
 # 1. Page Configuration
 st.set_page_config(page_title="NorAL Golf | Hub", page_icon="⛳", layout="wide")
 
-# 2. Auto-Refresh (Updates the leaderboard every 60 seconds without a manual refresh)
-st_autorefresh(interval=60 * 1000, key="leaderboard_refresh")
-
-# 3. High-End Custom Styling
+# 2. High-End Custom Styling
 st.markdown("""
     <style>
     .main { background-color: #0b090a; }
@@ -32,12 +28,12 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 4. Hero Section
+# 3. Hero Section
 st.markdown('<div class="hero"><h1>NORAL GOLF</h1><p>North Alabama\'s Premier Tournament Series</p></div>', unsafe_allow_html=True)
 
 st.divider()
 
-# 5. Live Leaderboard Section
+# 4. Live Leaderboard Section
 st.markdown('<p class="leaderboard-title">🏆 Live Tracking Leaderboard</p>', unsafe_allow_html=True)
 
 # Initialize Connection
@@ -45,7 +41,6 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 
 try:
     # Read the 'Players' tab from your Google Sheet
-    # ttl=0 ensures the app pulls fresh data every time it refreshes
     df = conn.read(worksheet="Players", ttl=0)
     
     # Filter out empty rows and sort by Index (lowest to highest)
@@ -67,11 +62,11 @@ except Exception as e:
 
 st.divider()
 
-# 6. Quick Navigation Info
+# 5. Quick Navigation Info
 col1, col2 = st.columns(2)
 with col1:
     st.write("### Next Event")
-    st.success("📅 **July 25, 2026** | Guntersville State Park")
+    st.success("📅 **July 25, 2026** | 2-Man Scramble | Guntersville State Park")
 with col2:
     st.write("### Join the Roster")
-    st.write("Contact us to verify your handicap and join the 2026 season.")
+    st.write("Contact us to verify your handicap and join the unified pool for the 2026 season.")
