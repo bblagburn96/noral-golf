@@ -1,35 +1,60 @@
 import streamlit as st
+from streamlit_gsheets import GSheetsConnection
+from streamlit_autorefresh import st_autorefresh
 
-st.set_page_config(page_title="NorAL Golf | Official Site", page_icon="⛳", layout="wide")
+st.set_page_config(page_title="NorAL Golf | Live", page_icon="⛳", layout="wide")
 
-# High-Class UI Styling
+# 1. AUTO-REFRESH (Every 60 seconds)
+st_autorefresh(interval=60 * 1000, key="leaderboard_refresh")
+
+# 2. BRANDING CSS
 st.markdown("""
     <style>
-    .main { background-color: #0b090a; }
-    .hero {
-        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                    url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=2070');
-        background-size: cover;
-        padding: 100px 20px;
-        text-align: center;
-        color: #d8f3dc;
-        border-radius: 20px;
-        border: 1px solid #1b4332;
+    .leaderboard-card {
+        background-color: #1b4332;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .live-indicator {
+        color: #4ade80;
+        font-weight: bold;
+        font-size: 0.8rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Hero Section
-st.markdown('<div class="hero"><h1>NORAL GOLF</h1><h3>The Standard for North Alabama Competitive Play</h3></div>', unsafe_allow_html=True)
+st.title("⛳ NorAL Golf Hub")
+
+# 3. LIVE LEADERBOARD SECTION
+st.markdown('### 🏆 Live Tracking Leaderboard <span class="live-indicator">● LIVE UPDATING</span>', unsafe_allow_html=True)
+
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+try:
+    # Pulling data from your 'Rounds' or 'LiveScores' tab
+    df = conn.read(worksheet="Players", ttl=0) # ttl=0 forces it to bypass cache
+    
+    # Sort by Score/Index
+    leaderboard = df.sort_values("Index").head(5) 
+    
+    # Display the Top 5 in professional cards
+    for i, row in leaderboard.iterrows():
+        st.markdown(f"""
+            <div class="leaderboard-card">
+                <span>{row['Name']}</span>
+                <span><b>{row['Index']}</b></span>
+            </div>
+        """, unsafe_allow_html=True)
+
+except Exception:
+    st.info("Leaderboard will populate once the first scores are logged.")
 
 st.divider()
 
-# Core Content
-col1, col2 = st.columns(2)
-with col1:
-    st.header("The Mission")
-    st.write("Organizing premier amateur golf tournaments across the Tennessee Valley with a focus on integrity and high-level competition.")
-with col2:
-    st.header("Upcoming Showcase")
-    st.success("📅 **July 25, 2026** | 2-Man Scramble | Guntersville State Park")
-
+# 4. REST OF YOUR HOME PAGE
+st.write("### Upcoming: July 25th Scramble")
+st.write("Registration is currently open for the Guntersville event.")
